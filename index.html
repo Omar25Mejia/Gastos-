@@ -1,19 +1,25 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#0b1220">
-  <meta name="description" content="Panel privado de control financiero personal">
-  <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="styles.css">
-  <title>Control Financiero</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1220">
+<meta name="description" content="Plataforma para ordenar deudas, ingresos y gastos.">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="styles.css">
+<title>Control Financiero</title>
 </head>
 <body>
-  <div id="toast" class="toast" aria-live="polite"></div>
+<div id="auth" class="auth-shell hidden">
+  <div class="auth-card">
+    <div class="brand auth-brand"><span class="brand-mark">$</span><div><strong>Control</strong><small>Financiero</small></div></div>
+    <div id="auth-content"></div>
+  </div>
+</div>
+<div id="app-shell" class="hidden">
   <aside class="sidebar">
     <div class="brand"><span class="brand-mark">$</span><div><strong>Control</strong><small>Financiero</small></div></div>
-    <nav>
+    <nav id="nav">
       <button class="nav-btn active" data-view="dashboard">▦ <span>Dashboard</span></button>
       <button class="nav-btn" data-view="deudas">◉ <span>Deudas</span></button>
       <button class="nav-btn" data-view="pagos">↗ <span>Pagos</span></button>
@@ -21,20 +27,23 @@
       <button class="nav-btn" data-view="ingresos">＋ <span>Ingresos</span></button>
       <button class="nav-btn" data-view="gastos">− <span>Gastos</span></button>
       <button class="nav-btn" data-view="estrategia">⚡ <span>Estrategia</span></button>
+      <button class="nav-btn admin-only hidden" data-view="admin">♙ <span>Administración</span></button>
       <button class="nav-btn" data-view="ajustes">⚙ <span>Ajustes</span></button>
     </nav>
-    <div class="sidebar-note">Datos guardados localmente en este navegador.</div>
+    <div class="sidebar-user"><b id="user-name">Usuario</b><small id="user-email"></small><button id="logout-btn" class="logout">Cerrar sesión</button></div>
   </aside>
-
   <main class="main">
     <header class="topbar">
-      <div><p class="eyebrow">PLAN DE SALIDA · 2026</p><h1 id="page-title">Dashboard</h1></div>
+      <div><p class="eyebrow">CONTROL FINANCIERO</p><h1 id="page-title">Dashboard</h1></div>
       <div class="top-actions"><button class="icon-btn" id="notify-btn" title="Activar notificaciones">🔔</button><button class="primary" id="quick-payment">+ Registrar pago</button></div>
     </header>
     <section id="app"></section>
   </main>
-
-  <div id="modal" class="modal hidden"><div class="modal-card"><div class="modal-head"><h2 id="modal-title">Nuevo registro</h2><button class="icon-btn" id="close-modal">×</button></div><form id="modal-form"></form></div></div>
-  <script src="app.js"></script>
+</div>
+<div id="toast" class="toast" aria-live="polite"></div>
+<div id="modal" class="modal hidden"><div class="modal-card"><div class="modal-head"><h2 id="modal-title">Nuevo registro</h2><button class="icon-btn" id="close-modal">×</button></div><form id="modal-form"></form></div></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
