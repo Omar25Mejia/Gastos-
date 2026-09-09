@@ -2,8 +2,10 @@
   "name": "Control Financiero",
   "short_name": "Finanzas",
   "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#f4f7fb",
   "theme_color": "#0b1220",
-  "description": "Panel personal para controlar deudas, pagos, ingresos y gastos."
+  "description": "Plataforma para controlar deudas, pagos, ingresos y gastos.",
+  "categories": ["finance", "productivity"]
 }
