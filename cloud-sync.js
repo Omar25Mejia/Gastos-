@@ -5,8 +5,13 @@
   if(!cfg?.url || !cfg?.anonKey || !window.supabase) return;
   const client=window.supabase.createClient(cfg.url,cfg.anonKey);
   const KEY='control-financiero-demo-v2';
+  const ACCOUNT_MARK='cf-account-initialized';
   let syncing=false;
   let userId=null;
+
+  function emptyFinance(){
+    return {debts:[],payments:[],incomes:[],expenses:[],settings:{salary:0,extraAverage:0,cashReserve:0,goalDate:'2026-12-31'}};
+  }
 
   async function pullOrSeed(user){
     userId=user.id;
@@ -14,16 +19,27 @@
     if(error){ console.error('Cloud finance read:',error); return; }
     const local=localStorage.getItem(KEY);
     if(data?.data && Object.keys(data.data).length){
-      localStorage.setItem(KEY,JSON.stringify(data.data));
-      if(local && local!==JSON.stringify(data.data)) location.reload();
+      const remote=JSON.stringify(data.data);
+      localStorage.setItem(KEY,remote);
+      localStorage.setItem(ACCOUNT_MARK,'1');
+      if(local && local!==remote) location.reload();
       return;
     }
-    if(local){
+
+    // Solo la primera cuenta creada en este navegador puede migrar el demo local.
+    // Las cuentas siguientes empiezan limpias para evitar mezclar datos entre usuarios.
+    if(!localStorage.getItem(ACCOUNT_MARK) && local){
       try{
         const parsed=JSON.parse(local);
         await client.from('user_finance').upsert({user_id:user.id,data:parsed},{onConflict:'user_id'});
+        localStorage.setItem(ACCOUNT_MARK,'1');
+        return;
       }catch(e){console.error('Cloud finance seed:',e);}
     }
+
+    localStorage.setItem(KEY,JSON.stringify(emptyFinance()));
+    localStorage.setItem(ACCOUNT_MARK,'1');
+    location.reload();
   }
 
   const originalSetItem=Storage.prototype.setItem;
@@ -41,11 +57,8 @@
   };
 
   client.auth.onAuthStateChange((event,session)=>{
-    if(session?.user){
-      setTimeout(()=>pullOrSeed(session.user),0);
-    }else{
-      userId=null;
-    }
+    if(session?.user) setTimeout(()=>pullOrSeed(session.user),0);
+    else userId=null;
   });
 
   client.auth.getSession().then(({data})=>{
