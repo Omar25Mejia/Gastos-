@@ -26,18 +26,24 @@
       return;
     }
 
-    // Solo la primera cuenta creada en este navegador puede migrar el demo local.
-    // Las cuentas siguientes empiezan limpias para evitar mezclar datos entre usuarios.
-    if(!localStorage.getItem(ACCOUNT_MARK) && local){
+    // En la primera cuenta, si el frontend todavía tiene el estado inicial en memoria,
+    // lo migramos a la cuenta recién creada. Las cuentas posteriores empiezan limpias.
+    if(!localStorage.getItem(ACCOUNT_MARK)){
       try{
-        const parsed=JSON.parse(local);
-        await client.from('user_finance').upsert({user_id:user.id,data:parsed},{onConflict:'user_id'});
-        localStorage.setItem(ACCOUNT_MARK,'1');
-        return;
+        const initial=(local && JSON.parse(local)) || (typeof db !== 'undefined' ? db : null);
+        if(initial && Array.isArray(initial.debts) && initial.debts.length){
+          const {error:seedError}=await client.from('user_finance').upsert({user_id:user.id,data:initial},{onConflict:'user_id'});
+          if(seedError) throw seedError;
+          localStorage.setItem(KEY,JSON.stringify(initial));
+          localStorage.setItem(ACCOUNT_MARK,'1');
+          location.reload();
+          return;
+        }
       }catch(e){console.error('Cloud finance seed:',e);}
     }
 
-    localStorage.setItem(KEY,JSON.stringify(emptyFinance()));
+    const clean=emptyFinance();
+    localStorage.setItem(KEY,JSON.stringify(clean));
     localStorage.setItem(ACCOUNT_MARK,'1');
     location.reload();
   }
